@@ -1,0 +1,56 @@
+---
+title: "hw09"
+author: "Abby Bergman"
+date: "11/27/2018"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#load libraries
+
+library(tidyverse)
+library(tidytext)
+library(tibble)
+library(dplyr)
+library(rjson)
+library(rvest)
+library(knitr)
+library(ggplot2)
+library(stringr)
+```
+
+
+```{r}
+#get data
+trump <- read_html("https://www.presidency.ucsb.edu/documents/inaugural-address-14") 
+
+
+
+trump <- html_nodes(trump, css = ".field-docs-content p") %>%
+  html_text() %>%
+  as.data.frame() 
+
+
+obama <- read_html("https://www.presidency.ucsb.edu/documents/inaugural-address-5")
+
+obama <- html_nodes(obama, css = ".field-docs-content p") %>%
+  html_text() %>%
+  as.data.frame()
+```
+
+```{r}
+#change column name
+colnames(trump) <- c("line")
+colnames(obama) <- c("line")
+
+#trying to get tokens
+tidy_trump <- bind_rows(trump)
+
+unnest_tokens(tbl = tidy_trump, output = word, input = line, token = "ngrams", n = 1)
+
+```
+
