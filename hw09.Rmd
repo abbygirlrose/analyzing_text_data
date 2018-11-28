@@ -21,36 +21,100 @@ library(rvest)
 library(knitr)
 library(ggplot2)
 library(stringr)
+library(tm) 
+library(reshape2)
+library(wordcloud)
 ```
 
 
 ```{r}
 #get data
-trump <- read_html("https://www.presidency.ucsb.edu/documents/inaugural-address-14") 
-
-
+trump <- read_html("https://www.presidency.ucsb.edu/documents/address-accepting-the-presidential-nomination-the-republican-national-convention-cleveland") 
 
 trump <- html_nodes(trump, css = ".field-docs-content p") %>%
   html_text() %>%
-  as.data.frame() 
+  as.vector()
 
+clinton <- read_html("https://www.presidency.ucsb.edu/documents/address-accepting-the-presidential-nomination-the-democratic-national-convention")
 
-obama <- read_html("https://www.presidency.ucsb.edu/documents/inaugural-address-5")
-
-obama <- html_nodes(obama, css = ".field-docs-content p") %>%
+clinton <- html_nodes(clinton, css = ".field-docs-content") %>%
   html_text() %>%
-  as.data.frame()
+  as.vector()
+
 ```
 
 ```{r}
-#change column name
-colnames(trump) <- c("line")
-colnames(obama) <- c("line")
+#custom stop words
 
-#trying to get tokens
-tidy_trump <- bind_rows(trump)
+custom_stop_words <- bind_rows(data_frame(word = c("trump"), lexicon = c("custom")), stop_words)
 
-unnest_tokens(tbl = tidy_trump, output = word, input = line, token = "ngrams", n = 1)
+#get trump tokens
+trump_df <- trump %>%
+  data_frame(line = 1:127, trump = trump) %>%
+  select(trump)
+
+colnames(trump_df) <- c("line")
+
+trump_tidy <- trump_df %>%
+  unnest_tokens(output = word, input = trump, token = "ngrams", n = 1) %>%
+  anti_join(custom_stop_words)%>%
+  select(word)
+  
+#get clinton tokens
+clinton_df <- clinton %>%
+  data_frame(line = 1:150, clinton = clinton) %>%
+  select(clinton)
+
+colnames(clintom_df) <- c("line")
+
+clinton_tidy <- clinton_df %>%
+  unnest_tokens(output = word, input = clinton, token = "ngrams", n = 1)%>%
+  anti_join(custom_stop_words)
+```
+
+
+
+```{r}
+sentiments <- get_sentiments("bing")
+
+feelings_trump <- trump_tidy %>%
+  inner_join(sentiments)
+
+feelings_clinton <- clinton_tidy %>%
+  inner_join(sentiments)
+```
+```{r}
+#looking at negative/positive
+
+
+feelings_trump %>%
+  select(word, sentiment) %>%
+   count(word, sentiment, sort = TRUE)%>%
+  arrange(desc(n)) %>%
+   acast(word ~ sentiment, value.var = "n", fill = 0) %>%
+  comparison.cloud(colors = c("red", "blue"), max.words = 13)
+
+feelings_clinton %>%
+  select(word, sentiment) %>%
+  count(word, sentiment, sort = TRUE) %>%
+  acast(word ~ sentiment, value.var = "n", fill = 0) %>%
+  comparison.cloud(colors = c("red", "blue"), max.words = 12)
 
 ```
+
+
+
+
+
+```{r}
+#make word cloud
+clinton_neg %>%
+  acast(word ~ sentiment, value.var = "n", fill = 0) %>%
+  comparison.cloud(colors = c("red", "blue"), max.words = 50)
+
+```
+
+
+
+
 
