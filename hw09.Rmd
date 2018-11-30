@@ -4,12 +4,13 @@ author: "Abby Bergman"
 date: "11/27/2018"
 output: github_document
 ---
+#A Comparison of 2016 Democratic and Republican Party Nomination Speeches
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r, include = FALSE}
 #load libraries
 
 library(tidyverse)
@@ -27,7 +28,7 @@ library(wordcloud)
 ```
 
 
-```{r}
+```{r, include = FALSE}
 #get data
 trump <- read_html("https://www.presidency.ucsb.edu/documents/address-accepting-the-presidential-nomination-the-republican-national-convention-cleveland") 
 
@@ -43,7 +44,7 @@ clinton <- html_nodes(clinton, css = ".field-docs-content") %>%
 
 ```
 
-```{r}
+```{r, include = FALSE}
 #custom stop words
 
 custom_stop_words <- bind_rows(data_frame(word = c("trump"), lexicon = c("custom")), stop_words)
@@ -52,8 +53,6 @@ custom_stop_words <- bind_rows(data_frame(word = c("trump"), lexicon = c("custom
 trump_df <- trump %>%
   data_frame(line = 1:127, trump = trump) %>%
   select(trump)
-
-colnames(trump_df) <- c("line")
 
 trump_tidy <- trump_df %>%
   unnest_tokens(output = word, input = trump, token = "ngrams", n = 1) %>%
@@ -65,8 +64,6 @@ clinton_df <- clinton %>%
   data_frame(line = 1:150, clinton = clinton) %>%
   select(clinton)
 
-colnames(clintom_df) <- c("line")
-
 clinton_tidy <- clinton_df %>%
   unnest_tokens(output = word, input = clinton, token = "ngrams", n = 1)%>%
   anti_join(custom_stop_words)
@@ -74,7 +71,7 @@ clinton_tidy <- clinton_df %>%
 
 
 
-```{r}
+```{r, include = FALSE}
 sentiments <- get_sentiments("bing")
 
 feelings_trump <- trump_tidy %>%
@@ -83,35 +80,72 @@ feelings_trump <- trump_tidy %>%
 feelings_clinton <- clinton_tidy %>%
   inner_join(sentiments)
 ```
-```{r}
-#looking at negative/positive
 
+## Comparison of Negative and Positive Words for Trump
 
-feelings_trump %>%
+```{r, echo = FALSE}
+ feelings_trump %>%
   select(word, sentiment) %>%
-   count(word, sentiment, sort = TRUE)%>%
-  arrange(desc(n)) %>%
+   count(word, sentiment) %>%
    acast(word ~ sentiment, value.var = "n", fill = 0) %>%
-  comparison.cloud(colors = c("red", "blue"), max.words = 13)
+  comparison.cloud(colors = c("red", "blue"), max.words = 50,  title.size = 2, rot.per = .05, scale=c(3,.25))
+   
+```
 
+## Comparison of Negative and Positive for Clinton
+
+```{r, echo = FALSE}
 feelings_clinton %>%
   select(word, sentiment) %>%
   count(word, sentiment, sort = TRUE) %>%
   acast(word ~ sentiment, value.var = "n", fill = 0) %>%
-  comparison.cloud(colors = c("red", "blue"), max.words = 12)
-
+  comparison.cloud(colors = c("red", "blue"), max.words = 100, title.size = 2, rot.per = .05, scale=c(3,.25))
 ```
 
+## Comparison of Trump and Clinton's Negative Words
 
+```{r, echo=FALSE}
+#filter for negatives
+trump_neg <- feelings_trump %>%
+  filter(sentiment == "negative") %>%
+  mutate(name = "trump")
 
+clinton_neg <- feelings_clinton %>%
+  filter(sentiment == "negative") %>%
+  mutate(name = "clinton")
+#bindrows
+negative <- bind_rows(clinton_neg, trump_neg)
 
+#make cloud
+negative%>%
+  select(word, name) %>%
+  count(word, name, sort = TRUE) %>%
+  acast(word ~ name, value.var = "n", fill = 0)%>%
+  comparison.cloud(colors = c("red", "blue"), max.words = 100, rot.per = .01, scale=c(4,.25), title.size = 2, title.colors=NULL, match.colors=FALSE,
+	title.bg.colors="grey90")
+```
 
-```{r}
-#make word cloud
-clinton_neg %>%
-  acast(word ~ sentiment, value.var = "n", fill = 0) %>%
-  comparison.cloud(colors = c("red", "blue"), max.words = 50)
+## Comparison of Trump and Clinton's Positive Words
 
+```{r, echo = FALSE}
+#filter for negatives
+trump_pos <- feelings_trump %>%
+  filter(sentiment == "positive") %>%
+  mutate(name = "trump")
+
+clinton_pos <- feelings_clinton %>%
+  filter(sentiment == "positive") %>%
+  mutate(name = "clinton")
+#bindrows
+positive <- bind_rows(clinton_pos, trump_pos)
+
+#make cloud
+
+positive%>%
+  select(word, name) %>%
+  count(word, name, sort = TRUE) %>%
+  acast(word ~ name, value.var = "n", fill = 0)%>%
+  comparison.cloud(colors = c("red", "blue"), max.words = 70, rot.per = .01, scale=c(3,.25), title.size = 2)
 ```
 
 
