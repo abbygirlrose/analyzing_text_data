@@ -10,9 +10,12 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+For this assignment, I decided to explore sentiments in the 2016 party nomination speeches. I chose to use the bing leicon primarily because I was most interested in positive and negative sentiments. 
+
 ```{r, include = FALSE}
 #load libraries
 
+library(ngram)
 library(tidyverse)
 library(tidytext)
 library(tibble)
@@ -54,6 +57,7 @@ trump_df <- trump %>%
   data_frame(line = 1:127, trump = trump) %>%
   select(trump)
 
+#tidy trump data set
 trump_tidy <- trump_df %>%
   unnest_tokens(output = word, input = trump, token = "ngrams", n = 1) %>%
   anti_join(custom_stop_words)%>%
@@ -64,6 +68,7 @@ clinton_df <- clinton %>%
   data_frame(line = 1:150, clinton = clinton) %>%
   select(clinton)
 
+#tidy clinton data set
 clinton_tidy <- clinton_df %>%
   unnest_tokens(output = word, input = clinton, token = "ngrams", n = 1)%>%
   anti_join(custom_stop_words)
@@ -72,6 +77,7 @@ clinton_tidy <- clinton_df %>%
 
 
 ```{r, include = FALSE}
+#make dataset with bing lexicon
 sentiments <- get_sentiments("bing")
 
 feelings_trump <- trump_tidy %>%
@@ -84,8 +90,9 @@ feelings_clinton <- clinton_tidy %>%
 ## Comparison of Negative and Positive Words for Trump
 
 ```{r, echo = FALSE}
+#make first word cloud
  feelings_trump %>%
-  select(word, sentiment) %>%
+  select(word, sentiment) %>% #
    count(word, sentiment) %>%
    acast(word ~ sentiment, value.var = "n", fill = 0) %>%
   comparison.cloud(colors = c("red", "blue"), max.words = 50,  title.size = 2, rot.per = .05, scale=c(3,.25))
@@ -93,6 +100,7 @@ feelings_clinton <- clinton_tidy %>%
 ```
 
 The above word cloud compares negative and positive word uses for Donald Trump's 2016 Republican Party nomination speech. The most commonly used negative words (shown large and in red) were opponent and terrorism. His most used positive words were love and protect.
+
 ## Comparison of Negative and Positive for Clinton
 
 ```{r, echo = FALSE}
@@ -113,10 +121,12 @@ trump_neg <- feelings_trump %>%
   filter(sentiment == "negative") %>%
   mutate(name = "trump")
 
+#get clinton negatives
 clinton_neg <- feelings_clinton %>%
   filter(sentiment == "negative") %>%
   mutate(name = "clinton")
-#bindrows
+
+#bind rows to combine negatives from 2 speeches
 negative <- bind_rows(clinton_neg, trump_neg)
 
 #make cloud
@@ -128,24 +138,25 @@ negative%>%
 	title.bg.colors="grey90")
 ```
 
-The above worcloud shows the most used negative words of both speeches compared by speaker. Although this image shpws the same words as the previous two, this organization males a different comparison. Ths image shows that none of the most used words do not overlap between the two speeches. 
+The above wordcloud shows the most used negative words of both speeches compared by speaker. Although this image shpws the same words as the previous two, this organization males a different comparison. Ths image shows that none of the most used words do not overlap between the two speeches. 
 
 ## Comparison of Trump and Clinton's Positive Words
 
 ```{r, echo = FALSE}
-#filter for negatives
+#filter trump for postives
 trump_pos <- feelings_trump %>%
   filter(sentiment == "positive") %>%
   mutate(name = "trump")
 
+#get clinton positives
 clinton_pos <- feelings_clinton %>%
   filter(sentiment == "positive") %>%
   mutate(name = "clinton")
-#bindrows
+
+#bind rows to combine positives
 positive <- bind_rows(clinton_pos, trump_pos)
 
 #make cloud
-
 positive%>%
   select(word, name) %>%
   count(word, name, sort = TRUE) %>%
@@ -154,6 +165,43 @@ positive%>%
 ```
 
 Just as there was little to no overlap between highly used negative words in the two speeches, there was no overlap in the most used positive words.
+
+```{r}
+#join speeches with nrc lexicon
+sentiment_nrc <- get_sentiments("nrc")
+
+nrc_trump <- trump_tidy %>%
+  inner_join(sentiment_nrc)
+
+nrc_clinton <- clinton_tidy %>%
+  inner_join(sentiment_nrc)
+```
+
+```{r}
+#filter combined set for the sentiments I want
+nrc_clinton %>%
+  filter(sentiment != "positive") %>%
+  filter(sentiment != "negative") %>%
+  count( sentiment) %>%
+   ggplot() +
+  geom_col(aes(sentiment, n, color = sentiment, fill = sentiment)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    labs(title = "Trump Speech Using nrc Lexicon", y = "Word Count")
+```
+
+```{r}
+#filter trump set for the sentiments I want
+nrc_trump %>%
+  filter(sentiment != "positive") %>%
+  filter(sentiment != "negative") %>%
+  count( sentiment) %>%
+   ggplot() +
+  geom_col(aes(sentiment, n, color = sentiment, fill = sentiment)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title = "Trump Speech Using nrc Lexicon", y = "Word Count")
+
+```
+
 
 
 
