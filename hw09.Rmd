@@ -92,6 +92,7 @@ feelings_clinton <- clinton_tidy %>%
    
 ```
 
+The above word cloud compares negative and positive word uses for Donald Trump's 2016 Republican Party nomination speech. The most commonly used negative words (shown large and in red) were opponent and terrorism. His most used positive words were love and protect.
 ## Comparison of Negative and Positive for Clinton
 
 ```{r, echo = FALSE}
@@ -101,6 +102,8 @@ feelings_clinton %>%
   acast(word ~ sentiment, value.var = "n", fill = 0) %>%
   comparison.cloud(colors = c("red", "blue"), max.words = 100, title.size = 2, rot.per = .05, scale=c(3,.25))
 ```
+
+The above graph shows the most used word in Hillary Clinton's 2016 Democratic party nomination speech, compared between negative and positive sentiment using the bing lexicon. Her most used negative words are hard and fear. Her most used positive words are stronger and proud. 
 
 ## Comparison of Trump and Clinton's Negative Words
 
@@ -125,6 +128,8 @@ negative%>%
 	title.bg.colors="grey90")
 ```
 
+The above worcloud shows the most used negative words of both speeches compared by speaker. Although this image shpws the same words as the previous two, this organization males a different comparison. Ths image shows that none of the most used words do not overlap between the two speeches. 
+
 ## Comparison of Trump and Clinton's Positive Words
 
 ```{r, echo = FALSE}
@@ -147,6 +152,9 @@ positive%>%
   acast(word ~ name, value.var = "n", fill = 0)%>%
   comparison.cloud(colors = c("red", "blue"), max.words = 70, rot.per = .01, scale=c(3,.25), title.size = 2)
 ```
+
+Just as there was little to no overlap between highly used negative words in the two speeches, there was no overlap in the most used positive words.
+
 
 
 
