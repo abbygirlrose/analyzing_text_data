@@ -10,7 +10,7 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-For this assignment, I decided to explore sentiments in the 2016 party nomination speeches. I chose to use the bing leicon primarily because I was most interested in positive and negative sentiments. 
+For this assignment, I decided to explore sentiments in the 2016 party nomination speeches. I chose to use the bing lexicon primarily because I was most interested in positive and negative sentiments. I used the nrc lexicon to look at more specific sentiments in the speeches.
 
 ```{r, include = FALSE}
 #load libraries
@@ -203,7 +203,9 @@ nrc_trump %>%
 
 ```
 
-The two speeches have similar breakdowns using the nrc lexicon. Both speeches had high use of trust words and low use of disgust and surprise words. The Trump speech incorporated more use of fear and anger words, while the Clinton speech used more anticipatory words. 
+The two speeches have similar breakdowns using the nrc lexicon. Both speeches had high use of trust words and low use of disgust and surprise words. The Trump speech incorporated more use of fear and anger words, while the Clinton speech used more anticipatory words. Overall, when compared this way, the speeches had arguably more similarities than differences. 
+
+
 
 
 
