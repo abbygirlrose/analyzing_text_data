@@ -48,8 +48,7 @@ clinton <- html_nodes(clinton, css = ".field-docs-content") %>%
 ```
 
 ```{r, include = FALSE}
-#custom stop words
-
+#make custom stop words
 custom_stop_words <- bind_rows(data_frame(word = c("trump"), lexicon = c("custom")), stop_words)
 
 #get trump tokens
@@ -94,8 +93,8 @@ feelings_clinton <- clinton_tidy %>%
  feelings_trump %>%
   select(word, sentiment) %>% #
    count(word, sentiment) %>%
-   acast(word ~ sentiment, value.var = "n", fill = 0) %>%
-  comparison.cloud(colors = c("red", "blue"), max.words = 50,  title.size = 2, rot.per = .05, scale=c(3,.25))
+   acast(word ~ sentiment, value.var = "n", fill = 0) %>% #comparison word cloud
+  comparison.cloud(colors = c("red", "blue"),  max.words = 50,  title.size = 2, rot.per = .05, scale=c(3,.25))
    
 ```
 
@@ -107,7 +106,7 @@ The above word cloud compares negative and positive word uses for Donald Trump's
 feelings_clinton %>%
   select(word, sentiment) %>%
   count(word, sentiment, sort = TRUE) %>%
-  acast(word ~ sentiment, value.var = "n", fill = 0) %>%
+  acast(word ~ sentiment, value.var = "n", fill = 0) %>% #change shape of data set
   comparison.cloud(colors = c("red", "blue"), max.words = 100, title.size = 2, rot.per = .05, scale=c(3,.25))
 ```
 
@@ -162,6 +161,10 @@ positive%>%
   count(word, name, sort = TRUE) %>%
   acast(word ~ name, value.var = "n", fill = 0)%>%
   comparison.cloud(colors = c("red", "blue"), max.words = 70, rot.per = .01, scale=c(3,.25), title.size = 2)
+#use rot.per to change rotation
+#use max.words to change number of words
+#use scale to change words sizes
+#use title.size to change of titles
 ```
 
 Just as there was little to no overlap between highly used negative words in the two speeches, there was no overlap in the most used positive words.
@@ -189,6 +192,7 @@ nrc_clinton %>%
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) + #rotate axis labels
     labs(title = "Clinton Speech Using nrc Lexicon", y = "Word Count")
 
+#use theme(axis.text.x = element_text(angle = 90, hjust = 1)) to rotate axis labels
 
 #filter trump set for the sentiments I want
 nrc_trump %>%
